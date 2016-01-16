@@ -1,0 +1,13 @@
+{
+  "description": "Citations for Etherpad Documents, very WIP.",
+  "name": "ep_citation",
+  "version": "0.0.1",
+  "author": {
+    "name": "John McLear",
+    "email": "john@mclear.co.uk"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
