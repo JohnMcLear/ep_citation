@@ -74,7 +74,7 @@ exports.aceDomLineProcessLineAttributes = function(name, citation){
     id = id.trim();
     var citation = clientVars.ep_citation[id];
     // We have to get the citation contents from the clientVars..
-    preHtml += '<evidence class="evidence" id="'+id+'" title="Evidence" contentEditable="false"><a href="'+citation.url+'">'+citation.title+'</a>';
+    preHtml += '<evidence class="evidence" id="'+id+'" title="Evidence"><a href="'+citation.url+'">'+citation.title+'</a>';
     postHtml += '</evidence class="evidence">';
     processed = true;
   }
@@ -117,6 +117,9 @@ exports.aceEditEvent = function(hook, call, cb){
     var type = clientVars.citationType;
     padEditor.callWithAce(function(ace){
       ace.ace_handleDrop(type, json, clientVars.dropLineNumber);
+
+      // Create the new line break
+      ace.ace_replaceRange([clientVars.dropLineNumber+1,0], [clientVars.dropLineNumber+1,0], "\n");
     });
   }
 }
