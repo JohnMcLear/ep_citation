@@ -5,10 +5,18 @@ var padEditor;
 
 // Handle Drop events
 exports.aceDrop = function(hook, citation){
+  // There is a Chrome bug that prevents the drop event firing if the selStart & selEnd
+  // is the last available character on a editable div.  IE dragging an dropping onto
+  // the last character on teh last line wont even fire a drop event..
   citation.e.preventDefault();
   clientVars.isDropping = true;
   var json = citation.e.originalEvent.dataTransfer.getData("evidence");
   var lN = $(citation.e.target).prevAll("div");
+
+  // If we dropped on a none existant line whack it at the end of the pad
+  if($(citation.e.target).context.nodeName === "HTML"){
+    lN.length = $(citation.e.target).find("#innerdocbody").find("div").length -1;
+  }
 
   // TODO support other data types
   clientVars.citationType = "evidence";
