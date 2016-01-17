@@ -8,9 +8,12 @@ exports.aceDrop = function(hook, citation){
   citation.e.preventDefault();
   clientVars.isDropping = true;
   var json = citation.e.originalEvent.dataTransfer.getData("evidence");
-  clientVars.citationJSON = json;
-  clientVars.citationType = "evidence";
+  var lN = $(citation.e.target).prevAll("div");
+
   // TODO support other data types
+  clientVars.citationType = "evidence";
+  clientVars.dropLineNumber = lN.length;
+  clientVars.citationJSON = json;
 }
 
 // Bind the event handler to the toolbar buttons
@@ -80,21 +83,15 @@ exports.aceDomLineProcessLineAttributes = function(name, citation){
   }
 };
 
-function handleDrop(e, json){
+function handleDrop(type, json, lineNumber){
   var rep = this.rep;
   var documentAttributeManager = this.documentAttributeManager;
-  var lineNumber = rep.selStart[0];
   json = JSON.parse(json);
   json.id = json.miscId.replace(/[^a-z0-9]/gi,'');
 
   this.editorInfo.ace_callWithAce(function(ace){
-    lineNumber = 1;
-    ace.ace_replaceRange([0,0],[1,0], "EVIDENCE!");
-    documentAttributeManager.setAttributeOnLine(lineNumber, 'evidence', JSON.stringify(json)); // make the line a evidence
-    // TODO fix this.
+    documentAttributeManager.setAttributeOnLine(lineNumber, type, JSON.stringify(json)); // make the line a evidence
   });
-
-  // Take HTML and Data values and write it to the editor container
 }
 
 
@@ -108,9 +105,7 @@ exports.aceEditEvent = function(hook, call, cb){
     var json = clientVars.citationJSON;
     var type = clientVars.citationType;
     padEditor.callWithAce(function(ace){
-      ace.ace_handleDrop(type, json);
+      ace.ace_handleDrop(type, json, clientVars.dropLineNumber);
     });
-
   }
-
 }
