@@ -74,7 +74,7 @@ exports.aceDomLineProcessLineAttributes = function(name, citation){
     id = id.trim();
     var citation = clientVars.ep_citation[id];
     // We have to get the citation contents from the clientVars..
-    preHtml += '<evidence class="evidence" id="'+id+'">EVIDENCE<p class="title"><a href="'+citation.url+'">'+citation.title+'</a></p>';
+    preHtml += '<evidence class="evidence" id="'+id+'" title="Evidence" contentEditable="false"><a href="'+citation.url+'">'+citation.title+'</a>';
     postHtml += '</evidence class="evidence">';
     processed = true;
   }
@@ -95,6 +95,9 @@ function handleDrop(type, json, lineNumber){
   var rep = this.rep;
   var documentAttributeManager = this.documentAttributeManager;
   json = JSON.parse(json);
+
+  // We need a clean ID and this is a good way to do it.  It removes any non alpha-numeric chars
+  // from the miscId, this way we can still lookup the miscId by looking in the clientVars...
   json.id = json.miscId.replace(/[^a-z0-9]/gi,'');
 
   this.editorInfo.ace_callWithAce(function(ace){
