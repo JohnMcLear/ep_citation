@@ -11,7 +11,7 @@ exports.aceDrop = function(hook, citation){
   citation.e.preventDefault();
   clientVars.isDropping = true;
 
-  var div = $(citation.e.target);
+  var div = $(citation.e.target).closest("div");
   var jsdiv = citation.e.target;
   var divHTML = div.html();
   var divWidth = div.width();
@@ -70,10 +70,37 @@ exports.aceDrop = function(hook, citation){
 
     var splitHTML = "";
 
-    // Cake, there is an error here
-    $.each(divHTML.split(""), function(key, char){
-      splitHTML += "<span>"+char+"</span>";
+    // Cake, there is an error here -- CAKE STILL TO DO
+    // Need to look to implement http://stackoverflow.com/questions/11485773/wrap-words-in-paragraph-with-span-keep-nested-links-functioning
+    console.log("div", div);
+    $(div).children().each(function() {
+
+      var tagRE = /([^<]*)(<(?:\"[^\"]*\"|'[^']*'|[^>'\"]*)*>)([^<]*)/g,
+        match,
+        result = [],
+        i = 0;
+
+      console.log("child html", $(this).html());
+
+      while(match = tagRE.exec($(this).html())) {
+        var text1 = match[1].split(/\s+/),
+            len1 = text1.length;
+
+        var text2 = match[3].split(/\s+/),
+            len2 = text2.length;
+
+        for(var tIdx = 0; tIdx < len1; tIdx++ )
+            result[i++] = '<span>' + text1[tIdx] + '</span>';
+
+        result[i++] = match[2];
+
+        for(var tIdx = 0; tIdx < len2; tIdx++ )
+            result[i++] = '<span>' + text2[tIdx] + '</span>';
+      }
+      console.log(result);
+      $(this).html(result.join(' '));
     });
+
 
     var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999;width:"+divWidth+"px' id='citationWorker' class='ghettoCursorXPos'>"+splitHTML+"</span>";
 
