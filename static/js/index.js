@@ -95,7 +95,6 @@ exports.aceDrop = function(hook, citation){
       });
     }
 
-
     var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999;width:"+divWidth+"px' id='citationWorker' class='ghettoCursorXPos'>"+splitHTML+"</span>";
 
     // Add the HTML to the DOM
@@ -125,42 +124,26 @@ exports.aceDrop = function(hook, citation){
         selStart = key+1;
       }
     })
-
-    // Remove worker
-    // $(worker).remove();
-
-  // We know the Y and X offset, selStart only contains the X
-  // lN contains the line Number..
-  // We would basically set the attribute at this point
-  // console.log("selStart", selStart);
-
+    $(oldWorker).remove();
+    $(worker).remove();
   }
 
-
-  // TODO support other data types
-  clientVars.citationType = citation.e.originalEvent.dataTransfer.types[1];
-  clientVars.citationJSON = JSON.parse(citation.e.originalEvent.dataTransfer.getData(clientVars.citationType));
-  var cleanId = clientVars.citationJSON.miscId.replace(/[^a-z0-9]/gi,'');
-
-  clientVars.dropLineNumber = lN;
-
-  var type = clientVars.citationType;
-  var citation = clientVars.citationJSON;
+  var type = citation.e.originalEvent.dataTransfer.types[1];
+  var citation = JSON.parse(citation.e.originalEvent.dataTransfer.getData(type));
+  var cleanId = citation.miscId.replace(/[^a-z0-9]/gi,'');
 
   padeditor.ace.callWithAce(function (ace) {
 
     // TODO: Currently we can't get the X of a given drop range so we will just prepend it to any given line
-    var rep = ace.ace_getRep();
+    // var rep = ace.ace_getRep();
     // REP is wrong because it gets the position BEFORE the drag event :(
     // This is thoroughly documented here..
     // http://stackoverflow.com/questions/14678451/precise-drag-and-drop-within-a-contenteditable
     // var sel = window.getSelection(); // Also doesn't work
     // console.log(sel);
-
+    var citationNumber = countProperties(clientVars.ep_citation.citations) +1;
     if(!citation.quote){
-      ace.ace_replaceRange([lN,selStart], [lN,selStart], "[1]");
-//      console.log("YUMMY", document.caretRangeFromPoint(x,y));
-//      ace.ace_performSelectionChange([lN,0], [lN, false);
+      ace.ace_replaceRange([lN,selStart], [lN,selStart], "["+citationNumber+"]");
       ace.ace_performDocumentApplyAttributesToRange([lN,selStart], [lN,selStart+3], [["citation", cleanId]]);
     }
 
@@ -168,7 +151,6 @@ exports.aceDrop = function(hook, citation){
       // console.log("replacing range with quote", lN, selStart);
       ace.ace_replaceRange([lN,selStart], [lN,selStart], citation.quote);
       var quoteLength = citation.quote.length;
-      console.log("length", quoteLength);
       ace.ace_performSelectionChange([lN,selStart],[lN, selStart + quoteLength], false);
       ace.ace_performDocumentApplyAttributesToRange([lN, selStart], [lN, selStart + quoteLength], [["citation", cleanId]]);
     }
@@ -189,16 +171,15 @@ exports.postAceInit = function(hook, context){
 // Our sup/subscript attribute will result in a class
 // I'm not sure if this is actually required..
 exports.aceAttribsToClasses = function(hook, citation){
-  if(!clientVars.citations) clientVars.ep_citation = [];
-
   var classes = [];
   if(!clientVars.ep_citation){
     clientVars.ep_citation = {};
+    clientVars.ep_citation.citations = {};
   }
   if(citation.key == 'citation'){
     // We store the citations as a lookup with the id as a key
     var id = citation.value;
-    clientVars.ep_citation[id] = citation;
+    clientVars.ep_citation.citations[id] = citation;
     classes.push("citation:"+id);
   }
   return classes;
@@ -212,7 +193,8 @@ exports.aceRegisterBlockElements = function(){
 
 exports.aceInitialized = function(hook, citation){
   var editorInfo = citation.editorInfo;
-  // editorInfo.ace_handleDrop = _(handleDrop).bind(citation);
+  clientVars.ep_citation = {}
+  clientVars.ep_citation.citations = {};
 }
 
 exports.aceCreateDomLine = function(hook_name, args, cb) {
@@ -240,52 +222,12 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
 
 // Here we convert the class citation:x into a tag
 exports.aceDomLineProcessLineAttributes = function(name, citation){
-/*
-  var preHtml = "";
-  var postHtml = "";
-  var processed = false;
-  var citations = /citation:(.*?) /i.exec(citation.cls);
-  if(!citations && !processed) return [];
-  if(citations){
-    var id = citations[0];
-    id = id.replace("citation:", "");
-    id = id.trim();
-    var citation = clientVars.ep_citation[id];
-    // We have to get the citation contents from the clientVars..
-    preHtml += '<citation class="citation" id="'+id+'" title="citation"><a href="'+citation.url+'">'+citation.title+'</a>';
-    postHtml += '</citation class="citation">';
-    processed = true;
-  }
-
-  if(processed){
-    var modifier = {
-      preHtml: preHtml,
-      postHtml: postHtml,
-      processedMarker: true
-    };
-    return [modifier];
-  }else{
-    return [];
-  }
-*/
 };
 
 // Show the active Context
 exports.aceEditEvent = function(hook, call, cb){
-/*
-  var cs = call.callstack;
-  var rep = call.rep;
-  var documentAttributeManager = call.documentAttributeManager;
-  if(clientVars.isDropping && call.callstack.type === "idleWorkTimer"){
-    clientVars.isDropping = false;
-    var json = clientVars.citationJSON;
-    var type = clientVars.citationType;
-    padEditor.callWithAce(function(ace){
-      ace.ace_handleDrop(type, json, clientVars.dropLineNumber);
+}
 
-      // Create the new line break
-      ace.ace_replaceRange([clientVars.dropLineNumber+1,0], [clientVars.dropLineNumber+1,0], "\n");
-    });
-  }
-*/
+function countProperties(obj) {
+  return Object.keys(obj).length;
 }
