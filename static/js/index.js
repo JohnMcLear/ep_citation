@@ -15,31 +15,34 @@ exports.aceDrop = function(hook, citation){
   var jsdiv = citation.e.target;
   var divHTML = div.html();
   var divWidth = div.width();
-  var divStyle = getComputedStyle($(div)[0]);
 
-  // Porbably no longer needed
-  var lN = $(citation.e.target).closest("div").prevAll("div").length;
+  // If we're not actually dropping on a line but we're actually
+  // attempting to drop onto the last line
+  if(div.length === 0){
+    // Last line, this is so bad but it works 10/10
+    var divStyle = false;
+    var lN = citation.rep.lines.length() -1;
+  }else{
+    var divStyle = getComputedStyle($(div)[0]);
+    var lN = $(citation.e.target).closest("div").prevAll("div").length;
+  }
+  // console.log("lN", lN);
 
   // If the Div has no text at all we can assume it's a blank line..
-  console.log(div.text());
   if(div.text() === ""){
     var emptyLine = true;
     var selStart = 0;
-    console.log("no text in line");
+    // console.log("no text in line");
   }
 
   if(!emptyLine){
-
     // Get the X px offset of the drop event
     var offset = citation.e.originalEvent.clientX;
     // console.log("x offset", offset, "ln", lN);
 
     //  Borrowed from http://stackoverflow.com/questions/2558426/getcomputedstyle-or-cssmap-to-get-every-style-declaration
-    /////////////////// Temporary
     var styles= [];
-
     // The DOM Level 2 CSS way
-    //
     if ('getComputedStyle' in window) {
       var cs= getComputedStyle(jsdiv, '');
       if (cs.length!==0)
@@ -60,46 +63,37 @@ exports.aceDrop = function(hook, citation){
          for (var k in cs)
          styles.push([k, cs[k]]);
     }
-    /////////////// End of borrwed code
+    // End of borrwed code
 
     // Given we know the X offset inside of the DIV then redraw that DIV
     // wrapping each character in a span
-    // A lot of this logic is borrowed from https://github.com/redhog/ep_cursortrace/blob/master/static/js/main.js
+    // Parts borrowed from https://github.com/redhog/ep_cursortrace/blob/master/static/js/main.js
     var oldWorker = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').find("#citationWorker");
     $(oldWorker).remove();
 
     var splitHTML = "";
 
     // Cake, there is an error here -- CAKE STILL TO DO
-    // Need to look to implement http://stackoverflow.com/questions/11485773/wrap-words-in-paragraph-with-span-keep-nested-links-functioning
+    // http://stackoverflow.com/questions/11485773/wrap-words-in-paragraph-with-span-keep-nested-links-functioning
     console.log("div", div);
-    $(div).children().each(function() {
-
-      var tagRE = /([^<]*)(<(?:\"[^\"]*\"|'[^']*'|[^>'\"]*)*>)([^<]*)/g,
-        match,
-        result = [],
-        i = 0;
-
-      console.log("child html", $(this).html());
-
-      while(match = tagRE.exec($(this).html())) {
-        var text1 = match[1].split(/\s+/),
-            len1 = text1.length;
-
-        var text2 = match[3].split(/\s+/),
-            len2 = text2.length;
-
-        for(var tIdx = 0; tIdx < len1; tIdx++ )
-            result[i++] = '<span>' + text1[tIdx] + '</span>';
-
-        result[i++] = match[2];
-
-        for(var tIdx = 0; tIdx < len2; tIdx++ )
-            result[i++] = '<span>' + text2[tIdx] + '</span>';
-      }
-      console.log(result);
-      $(this).html(result.join(' '));
-    });
+    var multipleChildren = $(div).contents().children().length > 0;
+    if(!multipleChildren){
+      // console.log("doesn't have multiple children so can just wrap each char");
+      // console.log($(div).html());
+      var text = $(div).text();
+      var splitHTMLArr = [];
+      $.each(text.split(''), function(i, c){
+        splitHTMLArr.push("<span>"+c+"</span>");
+      });
+      var splitHTML = splitHTMLArr.join("");
+    }else{
+      // Div has multiple children so we need to iterate through each child to wrap it.
+      // CAKE This is still to do
+      $(div).contents().children().each(function(i, node) {
+        console.log("node", node);
+        console.log("this", this);
+      });
+    }
 
 
     var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999;width:"+divWidth+"px' id='citationWorker' class='ghettoCursorXPos'>"+splitHTML+"</span>";
@@ -120,18 +114,20 @@ exports.aceDrop = function(hook, citation){
     var offsetElements = $(worker).children("span");
 
     $.each(offsetElements, function(key, span){
-      leftOffsets.push(span.offsetLeft);
+      // We take the width and divide by two here because browsers
+      // switch caret location half way through a character..  TIL
+      leftOffsets.push(span.offsetLeft + ($(span).width() /2));
     })
 
     var selStart = 0;
     $.each(leftOffsets, function(key, spanOffset){
-     if(offset >= spanOffset){
-        selStart = key;
+      if(offset > spanOffset){
+        selStart = key+1;
       }
     })
 
-    // Remove again, just in case..
-    $(oldWorker).remove();
+    // Remove worker
+    // $(worker).remove();
 
   // We know the Y and X offset, selStart only contains the X
   // lN contains the line Number..

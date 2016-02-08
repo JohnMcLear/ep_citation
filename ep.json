@@ -11,7 +11,8 @@
         "collectContentPost": "ep_citation/static/js/shared",
         "aceInitialized": "ep_citation/static/js/index",
 	"aceDrop": "ep_citation/static/js/index",
-	"aceEditEvent": "ep_citation/static/js/index"
+	"aceEditEvent": "ep_citation/static/js/index",
+	"aceCreateDomLine": "ep_citation/static/js/index"
       },
       "hooks": {
         "collectContentPre": "ep_citation/static/js/shared",
