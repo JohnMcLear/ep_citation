@@ -26,7 +26,6 @@ exports.aceDrop = function(hook, citation){
     var divStyle = getComputedStyle($(div)[0]);
     var lN = $(citation.e.target).closest("div").prevAll("div").length;
   }
-  // console.log("lN", lN);
 
   // If the Div has no text at all we can assume it's a blank line..
   if(div.text() === ""){
@@ -40,12 +39,9 @@ exports.aceDrop = function(hook, citation){
     var offsetX = citation.e.originalEvent.clientX;
     var offsetY = citation.e.originalEvent.clientY;
     var divOffsetTop = $(citation.e.target).closest("div").offset().top;
-    console.log("div offset top", divOffsetTop, "offsetY", offsetY);
 
     // We can compute how far down the target line the mouse event is..
     var lineDifference = offsetY - divOffsetTop;
-    console.log("lineDifference", lineDifference);
-    // console.log("x offset", offsetX, "ln", lN);
 
     //  Borrowed from http://stackoverflow.com/questions/2558426/getcomputedstyle-or-cssmap-to-get-every-style-declaration
     var styles= [];
@@ -82,7 +78,7 @@ exports.aceDrop = function(hook, citation){
 
     // Cake, there is an error here -- CAKE STILL TO DO
     // http://stackoverflow.com/questions/11485773/wrap-words-in-paragraph-with-span-keep-nested-links-functioning
-    console.log("div", div);
+
     var multipleChildren = $(div).contents().children().length > 0;
     if(!multipleChildren){
       // console.log("doesn't have multiple children so can just wrap each char");
@@ -132,22 +128,28 @@ exports.aceDrop = function(hook, citation){
 
     var selStart = 0;
     $.each(leftOffsets, function(key, spanOffset){
-      // If the left offset is correct
-// console.log("topOffsets", topOffsets);
-// console.log("spanOffset", spanOffset);
-
-      if(offsetY >= topOffsets[key]){
-        if(offsetX > spanOffset){
-// cake here CAKE CAKE
-console.log("if offsetY", offsetY, "is >=", topOffsets[key]);
-console.log("if offsetX", offsetX, "is >=", spanOffset);
-          selStart = key+1;
-          console.log("correct key!", selStart);
-
+      if(offsetY < topOffsets[key]){
+        // If the left offset is correct
+        if(spanOffset >= offsetX){
+          // Interesting thing we do here is actually pass the incorrect key
+          // but as 0 == 1 in Etherpad start position it self corrects! :)
+          selStart = key;
+          return false;
         }
       }
+      console.log("returning ", leftOffsets.length);
     })
-    // $(oldWorker).remove();
+    // If none of the above works we assume it's the end of the line..
+    if(selStart === 0) selStart = leftOffsets.length;
+
+    // If the caret is less than half into a character it should be at pos 0
+    // This seems complex but to see it in action simply comment this out
+    // Then drag something into position 0,1 or a wrapped line [x,1] where x
+    // is the Y of the wrapped line..
+    if(offsetX < (leftOffsets[0] * 2)){
+      selStart += -1;
+    }
+
     $(worker).remove();
   }
 
