@@ -37,8 +37,15 @@ exports.aceDrop = function(hook, citation){
 
   if(!emptyLine){
     // Get the X px offset of the drop event
-    var offset = citation.e.originalEvent.clientX;
-    // console.log("x offset", offset, "ln", lN);
+    var offsetX = citation.e.originalEvent.clientX;
+    var offsetY = citation.e.originalEvent.clientY;
+    var divOffsetTop = $(citation.e.target).closest("div").offset().top;
+    console.log("div offset top", divOffsetTop, "offsetY", offsetY);
+
+    // We can compute how far down the target line the mouse event is..
+    var lineDifference = offsetY - divOffsetTop;
+    console.log("lineDifference", lineDifference);
+    // console.log("x offset", offsetX, "ln", lN);
 
     //  Borrowed from http://stackoverflow.com/questions/2558426/getcomputedstyle-or-cssmap-to-get-every-style-declaration
     var styles= [];
@@ -95,7 +102,7 @@ exports.aceDrop = function(hook, citation){
       });
     }
 
-    var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999;width:"+divWidth+"px' id='citationWorker' class='ghettoCursorXPos'>"+splitHTML+"</span>";
+    var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999' id='citationWorker' class='ghettoCursorXPos'>"+splitHTML+"</span>";
 
     // Add the HTML to the DOM
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').append(newLine);
@@ -106,25 +113,41 @@ exports.aceDrop = function(hook, citation){
     $.each(styles, function(key, style){
       $(worker).css(style[0], style[1]);
     });
-    $(worker).css({position:"absolute", top:0, left:0});
+    $(worker).css({position:"absolute", top:0, left:0, width:divWidth+"px"});
 
     // We know the offset of the click event and we know the offset of each span
     var leftOffsets = [];
+    var topOffsets = [];
+
     var offsetElements = $(worker).children("span");
 
+    // push a blank line with 0 top position :)
+    topOffsets.push(0);
     $.each(offsetElements, function(key, span){
       // We take the width and divide by two here because browsers
       // switch caret location half way through a character..  TIL
       leftOffsets.push(span.offsetLeft + ($(span).width() /2));
+      topOffsets.push(span.offsetTop + $(span).height());
     })
 
     var selStart = 0;
     $.each(leftOffsets, function(key, spanOffset){
-      if(offset > spanOffset){
-        selStart = key+1;
+      // If the left offset is correct
+// console.log("topOffsets", topOffsets);
+// console.log("spanOffset", spanOffset);
+
+      if(offsetY >= topOffsets[key]){
+        if(offsetX > spanOffset){
+// cake here CAKE CAKE
+console.log("if offsetY", offsetY, "is >=", topOffsets[key]);
+console.log("if offsetX", offsetX, "is >=", spanOffset);
+          selStart = key+1;
+          console.log("correct key!", selStart);
+
+        }
       }
     })
-    $(oldWorker).remove();
+    // $(oldWorker).remove();
     $(worker).remove();
   }
 
@@ -213,8 +236,8 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     }
     return cb([{
       cls: clss.join(" "),
-      extraOpenTags: "<span class='citation'><a href='" + unescape(value) + "'>",
-      extraCloseTags: '</a>'
+      extraOpenTags: "<span class='citation'><sup><a href='" + unescape(value) + "'>",
+      extraCloseTags: '</a></sup></span>'
     }]);
   }
   return cb();
