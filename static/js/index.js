@@ -175,10 +175,10 @@ exports.aceDrop = function(hook, citation){
 
     if(citation.quote){
       // console.log("replacing range with quote", lN, selStart);
-      ace.ace_replaceRange([lN,selStart], [lN,selStart], citation.quote);
+      ace.ace_replaceRange([lN,selStart], [lN,selStart], citation.quote + "["+citationNumber+"]");
       var quoteLength = citation.quote.length;
-      ace.ace_performSelectionChange([lN,selStart],[lN, selStart + quoteLength], false);
-      ace.ace_performDocumentApplyAttributesToRange([lN, selStart], [lN, selStart + quoteLength], [["citation", cleanId]]);
+      ace.ace_performSelectionChange([lN,selStart + quoteLength],[lN, selStart + quoteLength + 3], false);
+      ace.ace_performDocumentApplyAttributesToRange([lN, selStart + quoteLength], [lN, selStart + quoteLength + 3], [["citation", cleanId]]);
     }
     ace.ace_focus();
   }, "citation");
