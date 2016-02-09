@@ -228,7 +228,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
   if (args.cls.indexOf('citation:') >= 0) {
     var clss = [];
     var argClss = args.cls.split(" ");
-     var value;
+    var value;
 
     for (var i = 0; i < argClss.length; i++) {
       var cls = argClss[i];
