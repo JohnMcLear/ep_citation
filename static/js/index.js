@@ -136,7 +136,6 @@ exports.aceDrop = function(hook, citation){
           return false;
         }
       }
-      console.log("returning ", leftOffsets.length);
     })
     // If none of the above works we assume it's the end of the line..
     if(selStart === 0) selStart = leftOffsets.length;
@@ -157,6 +156,7 @@ exports.aceDrop = function(hook, citation){
   var type = citation.e.originalEvent.dataTransfer.types[typeId];
   var citation = JSON.parse(citation.e.originalEvent.dataTransfer.getData(type));
   var cleanId = citation.miscId.replace(/[^a-z0-9]/gi,'');
+  var title = citation.title;
 
   padeditor.ace.callWithAce(function (ace){
 
@@ -170,7 +170,7 @@ exports.aceDrop = function(hook, citation){
     var citationNumber = countProperties(clientVars.ep_citation.citations) +1;
     if(!citation.quote){
       ace.ace_replaceRange([lN,selStart], [lN,selStart], "["+citationNumber+"]");
-      ace.ace_performDocumentApplyAttributesToRange([lN,selStart], [lN,selStart+3], [["citation", cleanId]]);
+      ace.ace_performDocumentApplyAttributesToRange([lN,selStart], [lN,selStart+3], [["citation", cleanId + "$$" + title]]);
     }
 
     if(citation.quote){
@@ -178,7 +178,7 @@ exports.aceDrop = function(hook, citation){
       ace.ace_replaceRange([lN,selStart], [lN,selStart], citation.quote + "["+citationNumber+"]");
       var quoteLength = citation.quote.length;
       ace.ace_performSelectionChange([lN,selStart + quoteLength],[lN, selStart + quoteLength + 3], false);
-      ace.ace_performDocumentApplyAttributesToRange([lN, selStart + quoteLength], [lN, selStart + quoteLength + 3], [["citation", cleanId]]);
+      ace.ace_performDocumentApplyAttributesToRange([lN, selStart + quoteLength], [lN, selStart + quoteLength + 3], [["citation", cleanId + "$$" + title]]);
     }
     ace.ace_focus();
   }, "citation");
@@ -203,8 +203,10 @@ exports.aceAttribsToClasses = function(hook, citation){
   }
   if(citation.key == 'citation'){
     // We store the citations as a lookup with the id as a key
-    var id = citation.value;
+    var id = citation.value.split("$$")[0];
+    var title = citation.value.split("$$")[1];
     clientVars.ep_citation.citations[id] = citation;
+    clientVars.ep_citation.citations[id].title = title;
     classes.push("citation:"+id);
   }
   return classes;
@@ -236,9 +238,11 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
 	clss.push(cls);
       }
     }
+    var title = clientVars.ep_citation.citations[value].title;
+
     return cb([{
       cls: clss.join(" "),
-      extraOpenTags: "<span class='citation'><sup><a href='" + unescape(value) + "'>",
+      extraOpenTags: "<span class='citation'><sup><a title='" + title + "' href='" + unescape(value) + "'>",
       extraCloseTags: '</a></sup></span>'
     }]);
   }
