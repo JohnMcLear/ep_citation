@@ -78,7 +78,6 @@ exports.aceDrop = function(hook, citation){
 
     // Cake, there is an error here -- CAKE STILL TO DO
     // http://stackoverflow.com/questions/11485773/wrap-words-in-paragraph-with-span-keep-nested-links-functioning
-
     var multipleChildren = $(div).contents().children().length > 0;
     if(!multipleChildren){
       // console.log("doesn't have multiple children so can just wrap each char");
@@ -151,13 +150,15 @@ exports.aceDrop = function(hook, citation){
     }
 
     $(worker).remove();
+
   }
 
-  var type = citation.e.originalEvent.dataTransfer.types[1];
+  var typeId = citation.e.originalEvent.dataTransfer.types.length -1;
+  var type = citation.e.originalEvent.dataTransfer.types[typeId];
   var citation = JSON.parse(citation.e.originalEvent.dataTransfer.getData(type));
   var cleanId = citation.miscId.replace(/[^a-z0-9]/gi,'');
 
-  padeditor.ace.callWithAce(function (ace) {
+  padeditor.ace.callWithAce(function (ace){
 
     // TODO: Currently we can't get the X of a given drop range so we will just prepend it to any given line
     // var rep = ace.ace_getRep();
@@ -181,7 +182,6 @@ exports.aceDrop = function(hook, citation){
     }
     ace.ace_focus();
   }, "citation");
-
 }
 
 // Bind the event handler to the toolbar buttons
