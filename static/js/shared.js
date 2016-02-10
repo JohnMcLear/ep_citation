@@ -1,28 +1,28 @@
-var supportedcitations = ["evidence"];
+var supportedcitations = ["citation"];
 
-exports.collectContentPre = function(hook, evidence){
-  var tname = evidence.tname;
-  var state = evidence.state;
+exports.collectContentPre = function(hook, citation){
+  var tname = citation.tname;
+  var state = citation.state;
   var lineAttributes = state.lineAttributes
   // top.console.log("tname", tname);
   if(tname === "div" || tname === "p"){
-    delete lineAttributes['evidence'];
+    delete lineAttributes['citation'];
   }
   if(supportedcitations.indexOf(tname) !== -1){
     // top.console.log("tname", tname);
-    lineAttributes['evidence'] = tname;
+    lineAttributes['citation'] = tname;
   }
 
   // Probably not needed
   // lineAttributes['lastlinebutton'] = true;
 };
 
-exports.collectContentPost = function(hook, evidence){
-  var tname = evidence.tname;
-  var state = evidence.state;
+exports.collectContentPost = function(hook, citation){
+  var tname = citation.tname;
+  var state = citation.state;
   var lineAttributes = state.lineAttributes;
   if(supportedcitations.indexOf(tname) !== -1){
-    delete lineAttributes['evidence'];
+    delete lineAttributes['citation'];
   }
 
   // Probably not needed
