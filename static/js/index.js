@@ -74,36 +74,20 @@ exports.aceDrop = function(hook, citation){
     var oldWorker = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').find("#citationWorker");
     $(oldWorker).remove();
 
-    var splitHTML = "";
-
-    // Cake, there is an error here -- CAKE STILL TO DO
-    // http://stackoverflow.com/questions/11485773/wrap-words-in-paragraph-with-span-keep-nested-links-functioning
-    var multipleChildren = $(div).contents().children().length > 0;
-    if(!multipleChildren){
-      // console.log("doesn't have multiple children so can just wrap each char");
-      // console.log($(div).html());
-      var text = $(div).text();
-      var splitHTMLArr = [];
-      $.each(text.split(''), function(i, c){
-        splitHTMLArr.push("<span>"+c+"</span>");
-      });
-      var splitHTML = splitHTMLArr.join("");
-    }else{
-      // Div has multiple children so we need to iterate through each child to wrap it.
-      // CAKE This is still to do
-      $(div).contents().children().each(function(i, node) {
-        console.log("node", node);
-        console.log("this", this);
-      });
-    }
-
-    var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999' id='citationWorker' class='ghettoCursorXPos'>"+splitHTML+"</span>";
+    var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999' id='citationWorker' class='ghettoCursorXPos'>"+$(div).html()+"</span>";
 
     // Add the HTML to the DOM
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').append(newLine);
 
     // Get the worker element
     var worker = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').find("#citationWorker");
+
+    // Blast the HTML into fragments, pew pew
+    $(worker).blast({
+      delimiter: "character",
+      tag: "span",
+      stripHTMLTags: false
+    });
 
     $.each(styles, function(key, style){
       $(worker).css(style[0], style[1]);
@@ -148,7 +132,7 @@ exports.aceDrop = function(hook, citation){
       selStart += -1;
     }
 
-    $(worker).remove();
+    // $(worker).remove();
 
   }
 
@@ -186,6 +170,7 @@ exports.aceDrop = function(hook, citation){
 
 // Bind the event handler to the toolbar buttons
 exports.postAceInit = function(hook, context){
+  // $.getScript( "/static/plugins/ep_citation/static/js/blast.min.js", function( data, textStatus, jqxhr ) {});
   // padEditor = context.ace;
 };
 

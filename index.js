@@ -105,3 +105,8 @@ function _analyzeLine(alineAttrs, apool) {
   }
   return context;
 }
+
+exports.eejsBlock_scripts = function (hook_name, args, cb) {
+  args.content = args.content + eejs.require("ep_citation/templates/scripts.ejs", {}, module);
+  return cb();
+}
