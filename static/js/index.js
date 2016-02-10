@@ -74,7 +74,11 @@ exports.aceDrop = function(hook, citation){
     var oldWorker = $('iframe[name="ace_outer"]').contents().find('#outerdocbody').find("#citationWorker");
     $(oldWorker).remove();
 
-    var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999' id='citationWorker' class='ghettoCursorXPos'>"+$(div).html()+"</span>";
+    divHTML = divHTML.replace(/<span/g, '<author');
+    divHTML = divHTML.replace(/<\/span/g, '</author');
+    console.log("divHTML", divHTML);
+
+    var newLine = "<span style='position:absolute;top:0;left:0;z-index:999999' id='citationWorker' class='ghettoCursorXPos'>"+divHTML+"</span>";
 
     // Add the HTML to the DOM
     $('iframe[name="ace_outer"]').contents().find('#outerdocbody').append(newLine);
@@ -98,20 +102,24 @@ exports.aceDrop = function(hook, citation){
     var leftOffsets = [];
     var topOffsets = [];
 
-    var offsetElements = $(worker).children("span");
+    var offsetElements = $(worker).find("span");
+
+    // console.log("offsetElements", offsetElements);
 
     // push a blank line with 0 top position :)
     topOffsets.push(0);
     $.each(offsetElements, function(key, span){
       // We take the width and divide by two here because browsers
       // switch caret location half way through a character..  TIL
+      var left = span.offsetLeft + ($(span).width() /2);
+      // console.log($(span).text(), left, offsetX);
       leftOffsets.push(span.offsetLeft + ($(span).width() /2));
       topOffsets.push(span.offsetTop + $(span).height());
     })
 
     var selStart = 0;
     $.each(leftOffsets, function(key, spanOffset){
-      if(offsetY < topOffsets[key]){
+      if(lineDifference < topOffsets[key]){
         // If the left offset is correct
         if(spanOffset >= offsetX){
           // Interesting thing we do here is actually pass the incorrect key
@@ -122,7 +130,11 @@ exports.aceDrop = function(hook, citation){
       }
     })
     // If none of the above works we assume it's the end of the line..
-    if(selStart === 0) selStart = leftOffsets.length;
+    if(selStart === 0){
+      // console.log("appears to be end of the line as we didn't catch any span in this X Y co-rd", offsetX, leftOffsets);
+      // console.log("Y", offsetY, topOffsets);
+      selStart = $(worker).text().length;
+    }
 
     // If the caret is less than half into a character it should be at pos 0
     // This seems complex but to see it in action simply comment this out
@@ -131,6 +143,8 @@ exports.aceDrop = function(hook, citation){
     if(offsetX < (leftOffsets[0] * 2)){
       selStart += -1;
     }
+
+console.log("selStart", selStart);
 
     // $(worker).remove();
 
