@@ -1,5 +1,3 @@
-# Very alpha/beta.  Do not use yet.
-
 # Drag and Drop Citations into Etherpad.
 
 Citations can be provided as ``evidence``, ``quotes`` etc (todo)
