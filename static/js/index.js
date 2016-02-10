@@ -88,7 +88,7 @@ exports.aceDrop = function(hook, citation){
 
     // Blast the HTML into fragments, pew pew
     $(worker).blast({
-      delimiter: "character",
+      delimiter: "all",
       tag: "span",
       stripHTMLTags: false
     });
@@ -102,9 +102,8 @@ exports.aceDrop = function(hook, citation){
     var leftOffsets = [];
     var topOffsets = [];
 
+    // Object of blasted elements
     var offsetElements = $(worker).find("span");
-
-    // console.log("offsetElements", offsetElements);
 
     // push a blank line with 0 top position :)
     topOffsets.push(0);
@@ -144,9 +143,7 @@ exports.aceDrop = function(hook, citation){
       selStart += -1;
     }
 
-console.log("selStart", selStart);
-
-    // $(worker).remove();
+    $(worker).remove();
 
   }
 
