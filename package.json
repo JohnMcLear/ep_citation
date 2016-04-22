@@ -1,7 +1,7 @@
 {
   "description": "Citations for Etherpad Documents, very WIP.",
   "name": "ep_citation",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "author": {
     "name": "John McLear",
     "email": "john@mclear.co.uk"
@@ -9,5 +9,10 @@
   "dependencies": {},
   "engines": {
     "node": "*"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JohnMcLear/ep_citation"
+  },
+  "license" : "Apache-2.0"
 }
