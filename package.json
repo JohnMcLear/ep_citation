@@ -1,7 +1,7 @@
 {
   "description": "Citations for Etherpad Documents, very WIP.",
   "name": "ep_citation",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": {
     "name": "John McLear",
     "email": "john@mclear.co.uk"
