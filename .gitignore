@@ -1,3 +1,4 @@
 .ep_initialized
 .npmignore
 
+node_modules/
